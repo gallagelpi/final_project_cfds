@@ -14,3 +14,7 @@ CLASS_MAP = {
     "alpaca": "alpaca",
     "not alpaca": "not_alpaca"
 }
+
+
+# Try to add Minimul size?
+# Try to add Minimul resolution? 
