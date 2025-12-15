@@ -1,10 +1,12 @@
 import os
 import shutil
+import torch
 from best_library.model.predict import Predictor
 from best_library.model.predict import load_trained_model
 
-DEVICE = "cuda"  # or detect automatically
-MODEL_PATH = "../models/best_model.pth"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# Assuming we run from the project root
+MODEL_PATH = "models/best_model.pth"
 
 
 class_names = ["alpaca", "not_alpaca"]
