@@ -1,25 +1,23 @@
 import torch
-import torch.nn as nn
 import torch.optim as optim
-import os
+import torch.nn as nn
+from best_library.evaluation.evaluate import evaluate_model
 
-from src.best_library.evaluation.evaluate import evaluate_model
 
-def train_model(model, train_loader, val_loader, epochs, lr, device, save_path=None):
+def train_model(model, train_loader, val_loader, epochs: int, lr: float, device: str):
     """
-    Trains the model.
+    Train a model and return the best validation accuracy.
 
     Args:
-        model: The PyTorch model.
-        train_loader: DataLoader for training data.
-        val_loader: DataLoader for validation data.
+        model: PyTorch model to train.
+        train_loader: DataLoader for training set.
+        val_loader: DataLoader for validation set.
         epochs (int): Number of epochs.
         lr (float): Learning rate.
-        device (str): Device to use.
-        save_path (str, optional): Path to save the trained model. If None, model is not saved.
-    
+        device (str): Device ('cpu' or 'cuda').
+
     Returns:
-        float: Best validation accuracy achieved.
+        best_val_acc (float): Best validation accuracy achieved during training.
     """
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -28,7 +26,7 @@ def train_model(model, train_loader, val_loader, epochs, lr, device, save_path=N
 
     for epoch in range(epochs):
         model.train()
-        train_correct, train_total = 0, 0
+        correct, total = 0, 0
 
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
@@ -40,20 +38,31 @@ def train_model(model, train_loader, val_loader, epochs, lr, device, save_path=N
             optimizer.step()
 
             preds = torch.argmax(outputs, dim=1)
-            train_correct += (preds == labels).sum().item()
-            train_total += labels.size(0)
+            correct += (preds == labels).sum().item()
+            total += labels.size(0)
 
-        train_acc = train_correct / train_total
-
-        # Validation
+        train_acc = correct / total
         val_acc = evaluate_model(model, val_loader, device)
 
         print(f"Epoch {epoch+1}/{epochs} | Train Acc: {train_acc:.3f} | Val Acc: {val_acc:.3f}")
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            if save_path:
-                torch.save(model.state_dict(), save_path)
-                print(f"Model saved as {save_path} (New Best: {best_val_acc:.3f})")
 
     return best_val_acc
+
+
+class Trainer:
+    """Class to train models with a fixed device."""
+
+    def __init__(self, device: str):
+        self.device = device
+
+    def train(self, model, train_loader, val_loader, epochs: int, lr: float):
+        """
+        Train a model using the device of the Trainer.
+
+        Returns:
+            best_val_acc (float): Best validation accuracy.
+        """
+        return train_model(model, train_loader, val_loader, epochs, lr, self.device)

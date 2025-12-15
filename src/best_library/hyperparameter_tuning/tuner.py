@@ -1,69 +1,105 @@
-import itertools
 import torch
-from src.best_library.model.model_definition import build_model
-from src.best_library.model.train import train_model
-from src.best_library.data.load_data import load_data
-from src.best_library.preprocessing.preprocessing import Preprocessing
+from best_library.model.model_definition import build_model
+from best_library.model.train import Trainer
+from best_library.evaluation.evaluate import evaluate_model
+import itertools
+
+# --- Pure functions ---
+
+def generate_param_combinations(param_grid: dict):
+    """Generate all combinations of hyperparameters."""
+    keys = param_grid.keys()
+    values = param_grid.values()
+    return [dict(zip(keys, combo)) for combo in itertools.product(*values)]
+
+
+def train_and_evaluate_model(model, train_loader, val_loader, trainer: Trainer, lr: float, epochs: int):
+    """
+    Train model (without saving) using Trainer and return validation accuracy.
+    """
+    trainer.train(model, train_loader, val_loader, epochs, lr)
+    val_acc = evaluate_model(model, val_loader, trainer.device)
+    return val_acc
+
+
+def select_best_model(results: list):
+    """Select the best hyperparameters and accuracy from results."""
+    if not results:
+        raise ValueError("No results to select from.")
+    best_params, best_acc = max(results, key=lambda x: x[1])
+    return best_params, best_acc
+
+
+def train_final_model(
+    best_params: dict,
+    train_loader,
+    val_loader,
+    trainer: Trainer,
+    save_path: str
+):
+    """Train final model with best hyperparameters and save it."""
+    num_classes = len(train_loader.dataset.classes)
+
+    model = build_model(num_classes=num_classes).to(trainer.device)
+
+    trainer.train(
+        model,
+        train_loader,
+        val_loader,
+        epochs=best_params.get("epochs", 3),
+        lr=best_params.get("lr", 1e-4)
+    )
+
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "best_params": best_params,
+            "num_classes": num_classes
+        },
+        save_path
+    )
+
+    print(f"Final model saved to {save_path}")
+
+    return model
+
+# --- Orchestrator class ---
 
 class HyperparameterTuner:
-    def __init__(self, work_dir, param_grid, img_size=224):
-        """
-        Args:
-            work_dir (str): Path to the split dataset.
-            param_grid (dict): Dictionary where keys are parameter names and values are lists of values to try.
-                               Example: {'lr': [1e-3, 1e-4], 'batch_size': [16, 32]}
-            img_size (int): Image size for preprocessing.
-        """
-        self.work_dir = work_dir
-        self.param_grid = param_grid
-        self.img_size = img_size
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+    """
+    Class to perform hyperparameter tuning and save the best model at the end.
+    """
 
-    def tune(self):
-        keys = self.param_grid.keys()
-        values = self.param_grid.values()
-        combinations = list(itertools.product(*values))
-        
-        best_acc = 0.0
-        best_params = None
-        
-        print(f"Starting Grid Search with {len(combinations)} combinations...")
-        
-        for i, combo in enumerate(combinations):
-            params = dict(zip(keys, combo))
-            print(f"\n--- Trial {i+1}/{len(combinations)}: {params} ---")
-            
-            # Extract params
-            lr = params.get('lr', 1e-4)
-            batch_size = params.get('batch_size', 16)
-            epochs = params.get('epochs', 3) # Default small for tuning
-            
-            # Setup Data
-            preprocessing = Preprocessing(img_size=self.img_size)
-            transform = preprocessing.get_transform()
-            
-            try:
-                train_loader, val_loader, class_names = load_data(self.work_dir, batch_size, transform)
-            except FileNotFoundError:
-                print("Data not found. Skipping.")
-                continue
-                
-            # Build Model
-            model = build_model(self.device, num_classes=len(class_names))
-            
-            # Train
-            # We don't save every model, only the best one conceptually, but here we just want the score
-            val_acc = train_model(model, train_loader, val_loader, epochs, lr, self.device, save_path=None)
-            
-            if val_acc > best_acc:
-                best_acc = val_acc
-                best_params = params
-                print(f"New Best Accuracy: {best_acc:.3f} with params {best_params}")
-                
-        print("\n============================================")
-        print(f"Tuning Complete.")
-        print(f"Best Accuracy: {best_acc:.3f}")
-        print(f"Best Parameters: {best_params}")
-        print("============================================")
-        
+    def __init__(self, param_grid: dict, device: str = None):
+        self.param_grid = param_grid
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.trainer = Trainer(self.device)
+
+    def tune(self, train_loader, val_loader, save_path: str):
+        param_combinations = generate_param_combinations(self.param_grid)
+        results = []
+
+        num_classes = len(train_loader.dataset.classes)
+        print(f"Starting hyperparameter tuning with {len(param_combinations)} combinations...")
+
+        # Train all combinations and record metrics
+        for i, params in enumerate(param_combinations):
+            print(f"\n--- Trial {i+1}/{len(param_combinations)}: {params} ---")
+            model = build_model(num_classes=num_classes).to(self.device)
+            val_acc = train_and_evaluate_model(
+                model, train_loader, val_loader, self.trainer,
+                lr=params.get("lr", 1e-4),
+                epochs=params.get("epochs", 3)
+            )
+            results.append((params, val_acc))
+            print(f"Trial finished. Validation accuracy: {val_acc:.3f}")
+
+        # Select best hyperparameters
+        best_params, best_acc = select_best_model(results)
+        print(f"\nBest combination: {best_params} with accuracy {best_acc:.3f}")
+
+        # Train final model with best hyperparameters and save it
+        print("Training final model with best hyperparameters...")
+        train_final_model(best_params, train_loader, val_loader, self.trainer, save_path)
+
         return best_params, best_acc
