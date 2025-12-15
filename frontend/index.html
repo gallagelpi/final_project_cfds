@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpaca Verifier</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="sky">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+    
+    <div class="grass"></div>
+
+    <div class="container">
+        <div class="header-sign">
+            <h1>ALPACAS OR NOT ALPACAS?</h1>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Alpaca Placeholder -->
+            <div class="character left-alpaca">
+                <img src="https://img.icons8.com/color/96/llama.png" alt="Alpaca Left">
+            </div>
+
+            <!-- Photo Frame -->
+            <div class="photo-frame-container">
+                <div class="speech-bubble">
+                    UPLOAD YOUR<br>PHOTO HERE!
+                </div>
+                <div class="photo-frame">
+                    <div class="photo-placeholder" id="imagePreview">
+                        <img src="https://img.icons8.com/ios/100/camera--v1.png" alt="Camera Icon" id="cameraIcon">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Alpaca Placeholder -->
+            <div class="character right-alpaca">
+                <img src="https://img.icons8.com/color/96/llama.png" alt="Alpaca Right" style="transform: scaleX(-1);">
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="file" id="imageInput" accept="image/*" hidden>
+            
+            <button class="btn btn-upload" onclick="document.getElementById('imageInput').click()">
+                <span class="icon">⬆️</span> UPLOAD YOUR IMAGE
+            </button>
+            
+            <button class="btn btn-verify" onclick="verifyImage()">
+                <span class="icon">🔍</span> VERIFY
+            </button>
+        </div>
+
+        <div id="resultModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <h2 id="resultTitle">Result</h2>
+                <p id="resultText">...</p>
+                <div id="confidenceBarContainer">
+                    <div id="confidenceBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
