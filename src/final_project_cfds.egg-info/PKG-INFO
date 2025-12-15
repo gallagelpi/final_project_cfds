@@ -4,7 +4,9 @@ Version: 0.1.0
 Summary: Add your description here
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.124.4
 Requires-Dist: torch>=2.9.1
 Requires-Dist: torchvision>=0.24.1
+Requires-Dist: uvicorn>=0.38.0
 
 # final_project_cfds
