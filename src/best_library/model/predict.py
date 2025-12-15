@@ -13,6 +13,10 @@ def load_trained_model(model_path, device, num_classes: int = 2):
     model = build_model(num_classes=num_classes, weights=None)
     model.load_state_dict(checkpoint["model_state_dict"])
 
+    # Decide device AFTER loading
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
     model = model.to(device)
     model.eval()
     return model

@@ -1,16 +1,22 @@
 import os
 import shutil
+import torch
 from best_library.model.predict import Predictor
 from best_library.model.predict import load_trained_model
 
 DEVICE = "cuda"  # or detect automatically
-MODEL_PATH = "../models/best_model.pth"
+MODEL_PATH = "models/best_model.pth"
 
 
 class_names = ["alpaca", "not_alpaca"]
 
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = load_trained_model(MODEL_PATH, DEVICE, num_classes=len(class_names))
+model = load_trained_model(
+    MODEL_PATH,
+    device=DEVICE,
+    num_classes=len(class_names)
+)
 
 predictor = Predictor(DEVICE, class_names)
 

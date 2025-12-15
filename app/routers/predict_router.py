@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app.schemas.predict_schema import PredictionResponse
 from app.services.predict_service import predict_image
 from best_library.preprocessing.preprocessing import Preprocessing
@@ -18,3 +18,4 @@ def predict(file: UploadFile = File(...)):
         label=label,
         confidence=confidence
     )
+

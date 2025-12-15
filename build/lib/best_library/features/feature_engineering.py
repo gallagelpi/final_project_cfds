@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import cv2
+import torch.nn.functional as F
 from scipy.stats import entropy
 
 def color_features(image: torch.Tensor):
@@ -17,13 +17,36 @@ def grayscale_histogram(image: torch.Tensor, bins: int = 16):
     return torch.tensor(hist, dtype=torch.float32)
 
 
+import torch
+import torch.nn.functional as F
+
 def edge_density(image: torch.Tensor):
-    """Edge density using Sobel filters."""
-    gray = image.mean(dim=0).numpy()
-    grad_x = cv2.Sobel(gray, cv2.CV_32F, 1, 0)
-    grad_y = cv2.Sobel(gray, cv2.CV_32F, 0, 1)
-    magnitude = np.sqrt(grad_x**2 + grad_y**2)
-    return torch.tensor([magnitude.mean()], dtype=torch.float32)
+    """Edge density using Sobel filters (no cv2)."""
+    # image: (C, H, W)
+    gray = image.mean(dim=0, keepdim=True).unsqueeze(0)  # (1, 1, H, W)
+
+    sobel_x = torch.tensor(
+        [[[-1, 0, 1],
+          [-2, 0, 2],
+          [-1, 0, 1]]],
+        dtype=torch.float32,
+        device=image.device
+    ).unsqueeze(0)
+
+    sobel_y = torch.tensor(
+        [[[-1, -2, -1],
+          [ 0,  0,  0],
+          [ 1,  2,  1]]],
+        dtype=torch.float32,
+        device=image.device
+    ).unsqueeze(0)
+
+    grad_x = F.conv2d(gray, sobel_x, padding=1)
+    grad_y = F.conv2d(gray, sobel_y, padding=1)
+
+    magnitude = torch.sqrt(grad_x**2 + grad_y**2)
+    return magnitude.mean()
+
 
 
 def image_entropy(image: torch.Tensor):
