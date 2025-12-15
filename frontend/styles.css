@@ -36,9 +36,26 @@ body {
     opacity: 0.8;
 }
 
-.cloud-1 { width: 100px; height: 40px; top: 10%; left: 10%; }
-.cloud-2 { width: 150px; height: 60px; top: 20%; right: 20%; }
-.cloud-3 { width: 80px; height: 30px; top: 40%; left: 40%; }
+.cloud-1 {
+    width: 100px;
+    height: 40px;
+    top: 10%;
+    left: 10%;
+}
+
+.cloud-2 {
+    width: 150px;
+    height: 60px;
+    top: 20%;
+    right: 20%;
+}
+
+.cloud-3 {
+    width: 80px;
+    height: 30px;
+    top: 40%;
+    left: 40%;
+}
 
 .grass {
     position: absolute;
@@ -68,19 +85,21 @@ body {
     padding: 10px 30px;
     display: inline-block;
     margin-bottom: 20px;
-    box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+    box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
 }
 
 .header-sign h1 {
     font-family: 'Fredoka One', cursive;
-    color: #FF69B4; /* Pink for ALPACAS */
+    color: #FF69B4;
+    /* Pink for ALPACAS */
     margin: 0;
     font-size: 2rem;
     text-shadow: 2px 2px 0 #fff;
 }
 
 .header-sign h1 span {
-    color: #FFD700; /* Yellow for NOT ALPACAS */
+    color: #FFD700;
+    /* Yellow for NOT ALPACAS */
 }
 
 /* Main Content Area */
@@ -97,7 +116,7 @@ body {
 .character img {
     width: 120px;
     height: auto;
-    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 /* Photo Frame */
@@ -107,8 +126,9 @@ body {
 
 .photo-frame {
     background: white;
-    padding: 15px 15px 40px 15px; /* Polaroid style padding */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    padding: 15px 15px 40px 15px;
+    /* Polaroid style padding */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     transform: rotate(-3deg);
     transition: transform 0.3s;
 }
@@ -149,7 +169,7 @@ body {
     padding: 10px;
     font-family: 'Fredoka One', cursive;
     font-size: 0.9rem;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 10;
 }
 
@@ -211,7 +231,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -228,7 +248,7 @@ body {
     border-radius: 20px;
     text-align: center;
     width: 300px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     font-family: 'Fredoka One', cursive;
 }
 
@@ -253,8 +273,77 @@ body {
 }
 
 #confidenceBar {
+    width: 0%;
     height: 100%;
     background-color: #7CFC00;
-    width: 0%;
-    transition: width 0.5s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.docs-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 20px;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background-color: var(--btn-blue);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h2 {
+    color: var(--wood-dark);
+    font-family: 'Fredoka One', cursive;
+}
+
+.tab-content h3 {
+    color: var(--btn-blue);
+    margin-top: 20px;
+}
+
+.code-block {
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    margin: 10px 0;
+    border-left: 4px solid var(--btn-blue);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

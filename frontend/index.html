@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alpaca Verifier</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="sky">
         <div class="cloud cloud-1"></div>
         <div class="cloud cloud-2"></div>
         <div class="cloud cloud-3"></div>
     </div>
-    
+
     <div class="grass"></div>
 
     <div class="container">
@@ -47,11 +50,11 @@
 
         <div class="controls">
             <input type="file" id="imageInput" accept="image/*" hidden>
-            
+
             <button class="btn btn-upload" onclick="document.getElementById('imageInput').click()">
                 <span class="icon">⬆️</span> UPLOAD YOUR IMAGE
             </button>
-            
+
             <button class="btn btn-verify" onclick="verifyImage()">
                 <span class="icon">🔍</span> VERIFY
             </button>
@@ -67,8 +70,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- Documentation Link -->
+        <div style="margin-top: 30px;">
+            <a href="docs.html" target="_blank" class="btn"
+                style="background-color: #FFD700; color: #8B4513; display: inline-flex; text-decoration: none;">
+                <span class="icon">📚</span> HOW IT WORKS
+            </a>
+        </div>
     </div>
 
     <script src="app.js"></script>
 </body>
+
 </html>
