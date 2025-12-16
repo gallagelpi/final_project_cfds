@@ -2,17 +2,19 @@
 
 ## Scaling Guidelines
 
-The library follows a **modular design pattern** with **abstract base classes** defining contracts for core components. This ensures consistency while enabling extensibility.
+The library follows a **modular design pattern** where **abstract base classes** are used strategically for components requiring strict contracts, while **flexible patterns** are used where variation is expected.
 
-### When to Use Abstract Base Classes
-- **Models**: Enforce consistent training/prediction interfaces
-- **Evaluators**: Standardize metric computation
-- **Feature Extractors**: Ensure uniform feature output
+### When to Use Abstract Base Classes (Strict Contracts)
+- **Models**: Enforce consistent training/prediction interfaces for interchangeability
+- **Evaluators**: Standardize metric computation for pipeline consistency
 
-### When Flexibility is Preferred
-- **Preprocessors**: Use-case specific transformations vary greatly
+### When Flexibility is Preferred (Informal Interfaces)
+- **Preprocessors**: Use-case specific transformations vary greatly across domains
+- **Feature Engineering**: Different features have different signatures and outputs
 - **Data Loaders**: Dataset structure determines implementation
 - **Utilities**: Helper functions don't need rigid contracts
+
+**Key Insight**: Only enforce abstraction where polymorphism is essential. Too many abstract classes create unnecessary rigidity.
 
 ### Contribution Workflow
 
@@ -29,9 +31,14 @@ Before contributing, new team members should:
 ## Abstract Base Classes Pattern
 
 ### Core Principle
-For components that require **consistent interfaces** (models, evaluators), we use abstract base classes to enforce contracts and enable polymorphism.
+Use abstract base classes **only when necessary** - specifically for components that:
+1. Need to be **swappable** in the pipeline (e.g., different model architectures)
+2. Require **guaranteed interfaces** for integration
+3. Benefit from **type checking** and IDE support
 
-### Example: Model Base Class
+**Don't overuse abstraction** - it can hinder flexibility and make simple additions complex.
+
+### Example: Model Base Class (RECOMMENDED for abstraction)
 
 ```python
 # src/best_library/base.py
