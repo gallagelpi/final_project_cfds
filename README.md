@@ -30,7 +30,7 @@ This is the model interface you use from notebooks/apps. It contains the full Re
 - **`build_model(num_classes=None, weights="IMAGENET1K_V1")`**
   - Builds a torchvision ResNet18.
   - Replaces the final `fc` layer to match `num_classes`.
-  - Moves the model to `self.device`.
+  - Moves the model to `self.device`, where in the computer you want it to run (by default tries GPU)
 - **`train_model(model, train_loader, val_loader, epochs, lr)`**
   - Trains the model using cross-entropy + Adam.
   - Prints train/val accuracy per epoch.
