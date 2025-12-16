@@ -1,5 +1,3 @@
-from .model_definition import ModelBuilder
-from .train import Trainer
-from .predict import Predictor
+from .model_resnet18 import ModelResnet18
 
-__all__ = ["ModelBuilder", "Trainer", "Predictor"]
+__all__ = ["ModelResnet18"]

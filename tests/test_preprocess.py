@@ -1,43 +1,83 @@
-import unittest
 import torch
+from torchvision import transforms
 from PIL import Image
-from src.best_library.preprocessing.preprocessing import Preprocessing
+import numpy as np
 
-class TestPreprocessing(unittest.TestCase):
-    def setUp(self):
-        self.img_size = 224
-        self.preprocessing = Preprocessing(img_size=self.img_size)
+from best_library.preprocessing.preprocessing import build_transform, Preprocessing
 
-    def test_transform_creation(self):
-        """Test if the transform is created successfully."""
-        transform = self.preprocessing.get_transform()
-        self.assertIsNotNone(transform)
 
-    def test_transform_output_shape(self):
-        """Test if the transform produces a tensor of the correct shape."""
-        # Create a dummy RGB image
-        dummy_img = Image.new('RGB', (500, 500), color='red')
-        
-        transform = self.preprocessing.get_transform()
-        output_tensor = transform(dummy_img)
-        
-        # Check type
-        self.assertIsInstance(output_tensor, torch.Tensor)
-        
-        # Check shape: (Channels, Height, Width)
-        expected_shape = (3, self.img_size, self.img_size)
-        self.assertEqual(output_tensor.shape, expected_shape)
+# ---------- Helpers ----------
 
-    def test_normalization(self):
-        """Test if normalization is applied (roughly)."""
-        # A pure white image [255, 255, 255] should not be all 1.0s after normalization
-        dummy_img = Image.new('RGB', (100, 100), color='white')
-        transform = self.preprocessing.get_transform()
-        output_tensor = transform(dummy_img)
-        
-        # If it was just ToTensor, max would be 1.0. With Normalize, it should be different.
-        # Mean=[0.485...], Std=[0.229...] -> (1 - 0.485)/0.229 ≈ 2.25
-        self.assertTrue(torch.max(output_tensor) > 1.0)
+def dummy_image(size=(300, 300)):
+    """Create a dummy RGB PIL image."""
+    array = (np.random.rand(*size, 3) * 255).astype(np.uint8)
+    return Image.fromarray(array)
 
-if __name__ == '__main__':
-    unittest.main()
+
+# ---------- build_transform tests ----------
+
+def test_build_transform_returns_compose():
+    transform = build_transform()
+    assert isinstance(transform, transforms.Compose)
+
+
+def test_build_transform_contains_resize():
+    transform = build_transform()
+    resize = transform.transforms[0]
+    assert isinstance(resize, transforms.Resize)
+
+
+def test_build_transform_contains_to_tensor():
+    transform = build_transform()
+    assert any(isinstance(t, transforms.ToTensor) for t in transform.transforms)
+
+
+def test_build_transform_contains_normalize():
+    transform = build_transform()
+    assert any(isinstance(t, transforms.Normalize) for t in transform.transforms)
+
+
+def test_build_transform_output_shape():
+    transform = build_transform(img_size=224)
+    img = dummy_image()
+    tensor = transform(img)
+
+    assert tensor.shape == (3, 224, 224)
+
+
+def test_build_transform_output_type():
+    transform = build_transform()
+    img = dummy_image()
+    tensor = transform(img)
+
+    assert isinstance(tensor, torch.Tensor)
+
+
+# ---------- Preprocessing class tests ----------
+
+def test_preprocessing_get_transform_returns_compose():
+    prep = Preprocessing()
+    transform = prep.get_transform()
+    assert isinstance(transform, transforms.Compose)
+
+
+def test_preprocessing_respects_img_size():
+    img_size = 128
+    prep = Preprocessing(img_size=img_size)
+    transform = prep.get_transform()
+
+    img = dummy_image()
+    tensor = transform(img)
+
+    assert tensor.shape == (3, img_size, img_size)
+
+
+def test_preprocessing_normalization_applied():
+    prep = Preprocessing()
+    transform = prep.get_transform()
+
+    img = dummy_image()
+    tensor = transform(img)
+
+    # After normalization, values shouldn't be in [0, 1]
+    assert tensor.min() < 0 or tensor.max() > 1

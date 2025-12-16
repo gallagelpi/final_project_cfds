@@ -1,7 +1,6 @@
 import torch
-from best_library.model.model_definition import build_model
-from best_library.model.train import Trainer
 from best_library.evaluation.evaluate import evaluate_model
+from best_library.model.model_resnet18 import ModelResnet18
 import itertools
 
 # --- Pure functions ---
@@ -13,12 +12,12 @@ def generate_param_combinations(param_grid: dict):
     return [dict(zip(keys, combo)) for combo in itertools.product(*values)]
 
 
-def train_and_evaluate_model(model, train_loader, val_loader, trainer: Trainer, lr: float, epochs: int):
+def train_and_evaluate_model(model, train_loader, val_loader, model_api: ModelResnet18, lr: float, epochs: int):
     """
-    Train model (without saving) using Trainer and return validation accuracy.
+    Train model (without saving) and return validation accuracy.
     """
-    trainer.train(model, train_loader, val_loader, epochs, lr)
-    val_acc = evaluate_model(model, val_loader, trainer.device)
+    model_api.train_model(model, train_loader, val_loader, epochs, lr)
+    val_acc = evaluate_model(model, val_loader, model_api.device)
     return val_acc
 
 
@@ -34,21 +33,15 @@ def train_final_model(
     best_params: dict,
     train_loader,
     val_loader,
-    trainer: Trainer,
+    model_api: ModelResnet18,
     save_path: str
 ):
     """Train final model with best hyperparameters and save it."""
     num_classes = len(train_loader.dataset.classes)
 
-    model = build_model(num_classes=num_classes).to(trainer.device)
+    model = model_api.build_model(num_classes=num_classes)
 
-    trainer.train(
-        model,
-        train_loader,
-        val_loader,
-        epochs=best_params.get("epochs", 3),
-        lr=best_params.get("lr", 1e-4)
-    )
+    model_api.train_model(model, train_loader, val_loader, epochs=best_params.get("epochs", 3), lr=best_params.get("lr", 1e-4))
 
     torch.save(
         {
@@ -73,21 +66,21 @@ class HyperparameterTuner:
     def __init__(self, param_grid: dict, device: str = None):
         self.param_grid = param_grid
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.trainer = Trainer(self.device)
 
     def tune(self, train_loader, val_loader, save_path: str):
         param_combinations = generate_param_combinations(self.param_grid)
         results = []
 
         num_classes = len(train_loader.dataset.classes)
+        model_api = ModelResnet18(device=self.device, class_names=train_loader.dataset.classes)
         print(f"Starting hyperparameter tuning with {len(param_combinations)} combinations...")
 
         # Train all combinations and record metrics
         for i, params in enumerate(param_combinations):
             print(f"\n--- Trial {i+1}/{len(param_combinations)}: {params} ---")
-            model = build_model(num_classes=num_classes).to(self.device)
+            model = model_api.build_model(num_classes=num_classes)
             val_acc = train_and_evaluate_model(
-                model, train_loader, val_loader, self.trainer,
+                model, train_loader, val_loader, model_api,
                 lr=params.get("lr", 1e-4),
                 epochs=params.get("epochs", 3)
             )
@@ -100,6 +93,6 @@ class HyperparameterTuner:
 
         # Train final model with best hyperparameters and save it
         print("Training final model with best hyperparameters...")
-        train_final_model(best_params, train_loader, val_loader, self.trainer, save_path)
+        train_final_model(best_params, train_loader, val_loader, model_api, save_path)
 
         return best_params, best_acc
