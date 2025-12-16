@@ -60,7 +60,7 @@ Observations:
 
  ## Scaling Guidelines
 
-The library follows a **modular design pattern** where **abstract base classes** are used to extend each part of the library. This README includes concrete examples from the current codebase.
+The library should follow a **modular design pattern** where **abstract base classes** to extend each part of the library. This README includes concrete examples from the current codebase.
 
 ## How to Contribute (Abstract-Class First)
 
