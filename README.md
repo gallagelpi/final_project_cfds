@@ -1,5 +1,5 @@
 The architecture of the library that we have created is the following:
-
+```
 scr/
 └── best_library/
     │
@@ -40,7 +40,7 @@ scr/
         ├── __init__.py
         └── evaluate.py
             └── Evaluator class
-
+```
 
 Observations:
 
