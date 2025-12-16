@@ -313,18 +313,9 @@ Tips: log trials, fix seeds, and make saving optional/configurable.
 
 ---
 
-## Quick Contribution Checklist
+## Contribution Checklist
 - Inherit from the appropriate base class for the component you add.
 - Implement the single primary method listed above (plus required helpers).
 - Add a unit test in `tests/` covering the primary method.
 - Update docstrings with inputs/outputs and defaults.
 - If you add dependencies, update `pyproject.toml`.
-
-## Contributing
-
-When contributing new components:
-1. Follow the established patterns and interfaces
-2. Write comprehensive tests
-3. Document all public APIs
-4. Ensure backward compatibility
-5. Update this README with usage examples
