@@ -25,4 +25,3 @@ src/final_project_cfds.egg-info/requires.txt
 src/final_project_cfds.egg-info/top_level.txt
 tests/test_features.py
 tests/test_preprocess.py
-tests/test_validation.py
