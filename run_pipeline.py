@@ -3,8 +3,7 @@ import torch
 from src.best_library.split.split_train_test import split_dataset
 from src.best_library.preprocessing.preprocessing import Preprocessing
 from src.best_library.data.load_data import load_data
-from src.best_library.model.model_definition import build_model
-from src.best_library.model.train import train_model
+from src.best_library.model.model_resnet18 import ModelResnet18
 from src.best_library.features.feature_engineering import compute_dataset_stats
 
 # CONFIG
@@ -41,11 +40,12 @@ def main():
     # 5. Build Model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using device:", device)
-    
-    model = build_model(device, num_classes=len(class_names))
-    
+
+    model_api = ModelResnet18(device=device, class_names=class_names)
+    model = model_api.build_model()
+
     # 6. Train Model
-    train_model(model, train_loader, val_loader, EPOCHS, LR, device, save_path="alpaca_classifier_lib.pt")
+    model_api.train_model(model, train_loader, val_loader, EPOCHS, LR)
 
 if __name__ == "__main__":
     main()

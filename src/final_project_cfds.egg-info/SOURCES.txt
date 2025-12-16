@@ -11,9 +11,7 @@ src/best_library/features/feature_engineering.py
 src/best_library/hyperparameter_tuning/__init__.py
 src/best_library/hyperparameter_tuning/tuner.py
 src/best_library/model/__init__.py
-src/best_library/model/model_definition.py
-src/best_library/model/predict.py
-src/best_library/model/train.py
+src/best_library/model/model_resnet18.py
 src/best_library/preprocessing/__init__.py
 src/best_library/preprocessing/preprocessing.py
 src/best_library/split/__init__.py
