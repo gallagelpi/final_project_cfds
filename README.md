@@ -101,17 +101,21 @@ class LoadData:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.data.load_data import LoadData
-from best_library.preprocessing.preprocessing import Preprocessing
+# src/best_library/data/load_data.py
+from best_library.base import BaseDataLoader
 
-transform = Preprocessing(img_size=224).get_transform()
-loader = LoadData(work_dir="data", transform=transform)
-train_loader, val_loader, class_names = loader.load_and_split(batch_size=32)
+class LoadData(BaseDataLoader):
+    def __init__(self, work_dir: str, transform):
+        self.work_dir = work_dir
+        self.transform = transform
+
+    def load_and_split(self, batch_size: int) -> Tuple[object, object, list]:
+        """Return train_loader, val_loader, class_names."""
+        ...
 ```
 
-Tips: validate directories, surface clear errors, keep batch_size configurable.
 
 ---
 
@@ -141,20 +145,20 @@ class DatasetSplitter:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.split.split_train_test import DatasetSplitter
+# src/best_library/split/split_train_test.py
+from best_library.base import BaseSplitter
 
-splitter = DatasetSplitter(
-    dataset_dir="dataset",
-    work_dir="data",
-    train_ratio=0.8,
-    seed=42,
-)
-splitter.split()
+class DatasetSplitter(BaseSplitter):
+    def __init__(self, dataset_dir: str, work_dir: str, train_ratio: float = 0.8, seed: int = 42):
+        ...
+
+    def split(self) -> None:
+        """Create train/val folders from a raw dataset."""
+        ...
 ```
 
-Tips: support custom class maps, ensure idempotent outputs (clear/rebuild folders safely).
 
 ---
 
@@ -184,15 +188,20 @@ class Preprocessing:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.preprocessing.preprocessing import Preprocessing
+# src/best_library/preprocessing/preprocessing.py
+from best_library.base import BasePreprocessing
 
-prep = Preprocessing(img_size=224)
-transform = prep.get_transform()
+class Preprocessing(BasePreprocessing):
+    def __init__(self, img_size: int = 224):
+        ...
+
+    def get_transform(self):
+        """Return a callable (e.g., torchvision.transforms.Compose)."""
+        ...
 ```
 
-Tips: keep transforms composable; accept img_size/augmentation flags; document expected input (PIL) and output (torch.Tensor).
 
 ---
 
@@ -219,18 +228,16 @@ class FeatureBuilder:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.features.feature_engineering import FeatureBuilder
+# src/best_library/features/feature_engineering.py
+from best_library.base import BaseFeatureExtractor
 
-fb = FeatureBuilder()
-# given a batch from a dataloader
-# images: torch.Tensor of shape (B, C, H, W)
-image_tensor = next(iter(train_loader))[0][0]  # first image from first batch
-feature_vec = fb.extract_features(image_tensor)  # concatenates color, histogram, edges, entropy, freq
+class FeatureBuilder(BaseFeatureExtractor):
+    def extract_features(self, image) -> object:
+        """Return a feature vector/tensor for a single image tensor (C,H,W)."""
+        ...
 ```
-
-Tips: keep functions pure; return consistent shapes; support GPU tensors; document feature meaning.
 
 ---
 
@@ -282,17 +289,28 @@ class ModelResnet18:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.model.model_resnet18 import ModelResnet18
+# src/best_library/model/model_resnet18.py
+from best_library.base import BaseModel
 
-model_api = ModelResnet18(device="cuda", class_names=["alpaca", "not_alpaca"])
-model = model_api.build_model()
-best_val = model_api.train_model(model, train_loader, val_loader, epochs=5, lr=1e-3)
-label, score = model_api.predict(image_path, model, transform)
+class ModelResnet18(BaseModel):
+    def __init__(self, device: str, class_names: list):
+        self.device = device
+        self.class_names = class_names
+
+    def build_model(self, num_classes: int | None = None, weights: str | None = "IMAGENET1K_V1"):
+        ...
+    
+    def train_model(self, model, train_loader, val_loader, epochs: int, lr: float) -> float:
+        ...
+    
+    def load_trained_model(self, model_path: str, num_classes: int | None = None):
+        ...
+    
+    def predict(self, image_path: str, model, transform):
+        ...
 ```
-
-Tips: support pretrained weights, checkpointing, early stopping, and device placement.
 
 ---
 
@@ -321,15 +339,19 @@ class Evaluator:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.evaluation.evaluate import Evaluator
+# src/best_library/evaluation/evaluate.py
+from best_library.base import BaseEvaluator
 
-evaluator = Evaluator(device="cuda")
-acc = evaluator.evaluate(model, val_loader)
+class Evaluator(BaseEvaluator):
+    def __init__(self, device: str):
+        ...
+    
+    def evaluate(self, model, val_loader) -> float:
+        """Return an evaluation score (e.g., accuracy)."""
+        ...
 ```
-
-Tips: extend with precision/recall/F1; ensure no_grad; keep outputs typed (float or dict).
 
 ---
 
@@ -358,22 +380,34 @@ class HyperparameterTuner:
         ...
 ```
 
-**Concrete example (current)**
+**Class (adapted from abstract)**
 ```python
-from best_library.hyperparameter_tuning.tuner import HyperparameterTuner
+# src/best_library/hyperparameter_tuning/tuner.py
+from best_library.base import BaseTuner
 
-grid = {"lr": [1e-3, 1e-4], "epochs": [3, 5]}
-tuner = HyperparameterTuner(param_grid=grid, device="cuda")
-best_params, best_acc = tuner.tune(train_loader, val_loader, save_path="models/best.pth")
+class HyperparameterTuner(BaseTuner):
+    def __init__(self, param_grid: dict, device: str | None = None):
+        ...
+    
+    def tune(self, train_loader, val_loader, save_path: str):
+        """Search hyperparameters, return best_params and best_score."""
+        ...
 ```
-
-Tips: log trials, fix seeds, and make saving optional/configurable.
 
 ---
 
-## Contribution Checklist
+## Quick Contribution Checklist
 - Inherit from the appropriate base class for the component you add.
 - Implement the single primary method listed above (plus required helpers).
 - Add a unit test in `tests/` covering the primary method.
 - Update docstrings with inputs/outputs and defaults.
 - If you add dependencies, update `pyproject.toml`.
+
+## Contributing
+
+When contributing new components:
+1. Follow the established patterns and interfaces
+2. Write comprehensive tests
+3. Document all public APIs
+4. Ensure backward compatibility
+5. Update this README with usage examples
