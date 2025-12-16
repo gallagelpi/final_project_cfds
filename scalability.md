@@ -30,11 +30,26 @@ class BaseDataLoader(ABC):
         raise NotImplementedError
 ```
 
+**Class (current)**
+```python
+# src/best_library/data/load_data.py
+class LoadData:
+    def __init__(self, work_dir: str, transform):
+        self.work_dir = work_dir
+        self.transform = transform
+
+    def load_and_split(self, batch_size: int):
+        """Return train_loader, val_loader, class_names."""
+        ...
+```
+
 **Concrete example (current)**
 ```python
 from best_library.data.load_data import LoadData
+from best_library.preprocessing.preprocessing import Preprocessing
 
-loader = LoadData(work_dir="data", transform=some_transform)
+transform = Preprocessing(img_size=224).get_transform()
+loader = LoadData(work_dir="data", transform=transform)
 train_loader, val_loader, class_names = loader.load_and_split(batch_size=32)
 ```
 
@@ -55,6 +70,17 @@ class BaseSplitter(ABC):
     def split(self) -> None:
         """Create train/val folders from a raw dataset."""
         raise NotImplementedError
+```
+
+**Class (current)**
+```python
+# src/best_library/split/split_train_test.py
+class DatasetSplitter:
+    def __init__(self, dataset_dir: str, work_dir: str, train_ratio: float = 0.8, seed: int = 42):
+        ...
+
+    def split(self) -> None:
+        ...
 ```
 
 **Concrete example (current)**
@@ -89,6 +115,17 @@ class BasePreprocessing(ABC):
         raise NotImplementedError
 ```
 
+**Class (current)**
+```python
+# src/best_library/preprocessing/preprocessing.py
+class Preprocessing:
+    def __init__(self, img_size: int = 224):
+        ...
+
+    def get_transform(self):
+        ...
+```
+
 **Concrete example (current)**
 ```python
 from best_library.preprocessing.preprocessing import Preprocessing
@@ -116,11 +153,22 @@ class BaseFeatureExtractor(ABC):
         raise NotImplementedError
 ```
 
+**Class (current)**
+```python
+# src/best_library/features/feature_engineering.py
+class FeatureBuilder:
+    def extract_features(self, image):
+        ...
+```
+
 **Concrete example (current)**
 ```python
 from best_library.features.feature_engineering import FeatureBuilder
 
 fb = FeatureBuilder()
+# given a batch from a dataloader
+# images: torch.Tensor of shape (B, C, H, W)
+image_tensor = next(iter(train_loader))[0][0]  # first image from first batch
 feature_vec = fb.extract_features(image_tensor)  # concatenates color, histogram, edges, entropy, freq
 ```
 
@@ -162,6 +210,20 @@ class BaseModel(ABC):
         raise NotImplementedError
 ```
 
+**Class (current)**
+```python
+# src/best_library/model/model_resnet18.py
+class ModelResnet18:
+    def build_model(self, num_classes: int | None = None, weights: str | None = "IMAGENET1K_V1"):
+        ...
+    def train_model(self, model, train_loader, val_loader, epochs: int, lr: float) -> float:
+        ...
+    def load_trained_model(self, model_path: str, num_classes: int | None = None):
+        ...
+    def predict(self, image_path: str, model, transform):
+        ...
+```
+
 **Concrete example (current)**
 ```python
 from best_library.model.model_resnet18 import ModelResnet18
@@ -191,6 +253,16 @@ class BaseEvaluator(ABC):
         raise NotImplementedError
 ```
 
+**Class (current)**
+```python
+# src/best_library/evaluation/evaluate.py
+class Evaluator:
+    def __init__(self, device: str):
+        ...
+    def evaluate(self, model, val_loader) -> float:
+        ...
+```
+
 **Concrete example (current)**
 ```python
 from best_library.evaluation.evaluate import Evaluator
@@ -216,6 +288,16 @@ class BaseTuner(ABC):
     def tune(self, train_loader, val_loader, save_path: str):
         """Search hyperparameters, return best_params and best_score."""
         raise NotImplementedError
+```
+
+**Class (current)**
+```python
+# src/best_library/hyperparameter_tuning/tuner.py
+class HyperparameterTuner:
+    def __init__(self, param_grid: dict, device: str | None = None):
+        ...
+    def tune(self, train_loader, val_loader, save_path: str):
+        ...
 ```
 
 **Concrete example (current)**
