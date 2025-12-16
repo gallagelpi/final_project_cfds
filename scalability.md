@@ -2,9 +2,7 @@
 
 ## Scaling Guidelines
 
-The library follows a **modular design pattern** where **abstract base classes** are used strategically for components requiring strict contracts, while **flexible patterns** are used where variation is expected.
-
-A modular image-classification library. This README is a fresh guide for new contributors on how to extend each part of the library using **abstract classes as contracts** plus concrete examples from the current codebase.
+The library follows a **modular design pattern** where **abstract base classes** are used to extend each part of the library. This README includes concrete examples from the current codebase.
 
 ## How to Contribute (Abstract-Class First)
 - Each component exposes one primary method; implement that method by inheriting from the suggested abstract base class (or interface) below.
