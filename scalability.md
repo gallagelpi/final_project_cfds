@@ -5,12 +5,6 @@
 The library follows a **modular design pattern** where **abstract base classes** are used to extend each part of the library. This README includes concrete examples from the current codebase.
 
 ## How to Contribute (Abstract-Class First)
-- Each component exposes one primary method; implement that method by inheriting from the suggested abstract base class (or interface) below.
-- Keep implementations minimal and focused; favor composition over inheritance for helpers.
-- Add tests for the primary method of your component.
-- Document inputs/outputs and defaults in docstrings.
-
-Before contributing, new team members should:
 
 1. **Review the architecture** - Understand which components use abstract classes
 2. **Check existing implementations** - Study similar components as templates
