@@ -16,10 +16,6 @@ def grayscale_histogram(image: torch.Tensor, bins: int = 16):
     hist, _ = np.histogram(gray, bins=bins, range=(0, 1), density=True)
     return torch.tensor(hist, dtype=torch.float32)
 
-
-import torch
-import torch.nn.functional as F
-
 def edge_density(image: torch.Tensor):
     """Edge density using Sobel filters (no cv2)."""
     # image: (C, H, W)
@@ -45,7 +41,7 @@ def edge_density(image: torch.Tensor):
     grad_y = F.conv2d(gray, sobel_y, padding=1)
 
     magnitude = torch.sqrt(grad_x**2 + grad_y**2)
-    return magnitude.mean()
+    return magnitude.mean().unsqueeze(0)
 
 
 
