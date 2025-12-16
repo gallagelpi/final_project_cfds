@@ -13,7 +13,7 @@ The library implements an end-to-end image classification workflow:
 
 - **Preprocessing**: defines the image transforms used for both training and inference.
 - **Dataset splitting**: creates `train/` and `val/` folders from a raw dataset.
-- **Data loading**: builds PyTorch `DataLoader`s for `train` and `val`.
+- **Data loading**: builds PyTorch `DataLoader`s for `train` and `val`. Applies the preprocessing tranformation.
 - **Model**: builds a ResNet18, trains it, saves/loads checkpoints, and predicts on images.
 - **Tuning & evaluation**: optional hyperparameter search + validation evaluation.
 
