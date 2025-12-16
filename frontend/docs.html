@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Alpaca Verifier</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            overflow-y: auto;
+            /* Allow scrolling for docs */
+            height: auto;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: var(--btn-blue);
+            font-family: 'Fredoka One', cursive;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sky">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+
+    <div class="grass"></div>
+
+    <a href="index.html" class="back-btn">⬅ Back to App</a>
+
+    <div class="container">
+        <div class="header-sign">
+            <h1>DOCUMENTATION</h1>
+        </div>
+
+        <!-- Documentation Section -->
+        <div class="docs-container">
+            <div class="docs-tabs">
+                <button class="tab-btn active" onclick="openTab('api-docs')">API Documentation</button>
+                <button class="tab-btn" onclick="openTab('lib-docs')">Library Internals</button>
+            </div>
+
+            <div id="api-docs" class="tab-content active">
+                <h2>📡 How the API Works</h2>
+                <p>The backend is built with <strong>FastAPI</strong> and serves a single endpoint:</p>
+                <div class="code-block">
+                    <code>POST /predict</code>
+                </div>
+                <ul>
+                    <li><strong>Input:</strong> An image file (multipart/form-data).</li>
+                    <li><strong>Process:</strong>
+                        <ol>
+                            <li>Receives the image bytes.</li>
+                            <li>Saves it temporarily to disk.</li>
+                            <li>Loads the trained <strong>ResNet18</strong> model.</li>
+                            <li>Preprocesses the image (Resize to 224x224, Normalize).</li>
+                            <li>Runs inference on the GPU/CPU.</li>
+                        </ol>
+                    </li>
+                    <li><strong>Output:</strong> JSON with the label ("alpaca" or "not_alpaca") and confidence score.
+                    </li>
+                </ul>
+            </div>
+
+            <div id="lib-docs" class="tab-content">
+                <h2>📚 Library Internals</h2>
+                <p>The core logic resides in <code>src/best_library</code>, a custom Python package.</p>
+
+                <h3>1. Preprocessing</h3>
+                <p>We use standard ImageNet transformations:</p>
+                <ul>
+                    <li>Resize to 224x224</li>
+                    <li>Convert to Tensor</li>
+                    <li>Normalize (Mean: [0.485, ...], Std: [0.229, ...])</li>
+                </ul>
+
+                <h3>2. Model Architecture</h3>
+                <p>We use <strong>Transfer Learning</strong> with ResNet18:</p>
+                <ul>
+                    <li><strong>Backbone:</strong> Pre-trained on ImageNet (1.2M images).</li>
+                    <li><strong>Head:</strong> We replaced the final layer to output only 2 classes.</li>
+                </ul>
+
+                <h3>3. Training Strategy</h3>
+                <p>The model was trained using:</p>
+                <ul>
+                    <li><strong>Optimizer:</strong> Adam (Adaptive Learning Rate).</li>
+                    <li><strong>Loss Function:</strong> CrossEntropyLoss.</li>
+                    <li><strong>Hyperparameter Tuning:</strong> Grid Search over Learning Rate and Batch Size.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function openTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab and activate button
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
